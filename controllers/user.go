@@ -107,7 +107,7 @@ func SignUpUserController(c echo.Context) error {
 		})
 	}
 
-	err = configs.SendMail(payloads.Email, "MySPP OTP", emailBody)
+	err = configs.SendMail(payloads.Email, "Rumeat Ball OTP", emailBody)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.Response{
 			Message:  "failed send email",
@@ -115,10 +115,49 @@ func SignUpUserController(c echo.Context) error {
 		})
 	}
 
-	response := dto.ConvertToUserResponse(data)
+	data, token, err := repositories.CheckUser(payloads.Email, payloads.Password)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "fail login",
+			Response: err.Error(),
+		})
+	}
+
+	response := dto.LoginResponse{
+		ID:    data.ID,
+		Email: data.Email,
+		Token: token,
+	}
 
 	return c.JSON(http.StatusCreated, dto.Response{
 		Message:  "success sign up",
 		Response: response,
+	})
+}
+
+func ValidateOTP(c echo.Context) error {
+	var ValidateOTPReq = dto.ValidateOTPRequest{}
+	errBind := c.Bind(&ValidateOTPReq)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	data, err := repositories.ValidateOTP(ValidateOTPReq.Email, ValidateOTPReq.OTP)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed validate otp",
+			"response": err.Error(),
+		})
+	}
+	response := map[string]any{
+		"email": data.Email,
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success validate otp",
+		"response": response,
 	})
 }

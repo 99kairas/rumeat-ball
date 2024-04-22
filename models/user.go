@@ -13,4 +13,5 @@ type User struct {
 	Phone    string    `json:"phone" form:"phone"`
 	Password string    `json:"password" form:"password"`
 	Status   string    `gorm:"type:enum('verified', 'unverified');default:unverified" json:"status" form:"status"`
+	OTP      string    `json:"otp" form:"otp"`
 }

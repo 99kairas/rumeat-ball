@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"html/template"
+	"time"
 )
 
 func RenderOTPTemplate(otp string) (string, error) {
@@ -47,16 +48,12 @@ func RenderOTPTemplate(otp string) (string, error) {
           <tbody>
             <tr style="height: 0;">
               <td>
-                <img
-                  alt=""
-                  src="https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1663574980688_114990/archisketch-logo"
-                  height="30px"
-                />
+                
               </td>
               <td style="text-align: right;">
                 <span
                   style="font-size: 16px; line-height: 30px; color: #ffffff;"
-                  >12 Nov, 2021</span
+                  >{{.CurrentDate}}</span
                 >
               </td>
             </tr>
@@ -104,11 +101,11 @@ func RenderOTPTemplate(otp string) (string, error) {
                 letter-spacing: 0.56px;
               "
             >
-              Thank you for choosing Archisketch Company. Use the following OTP
-              to complete the procedure to change your email address. OTP is
+              Thank you for choosing Rumeat Ball. Use the following OTP
+              to complete the procedure to verify your email address. OTP is
               valid for
               <span style="font-weight: 600; color: #1f1f1f;">5 minutes</span>.
-              Do not share this code with others, including Archisketch
+              Do not share this code with others, including Rumeat Ball
               employees.
             </p>
             <p
@@ -163,9 +160,11 @@ func RenderOTPTemplate(otp string) (string, error) {
 
 	var emailBodyContent bytes.Buffer
 	data := struct {
-		OTP string
+		OTP         string
+		CurrentDate string
 	}{
-		OTP: otp,
+		OTP:         otp,
+		CurrentDate: time.Now().Local().Format("02 Jan 2006"),
 	}
 
 	err = tmpl.Execute(&emailBodyContent, data)

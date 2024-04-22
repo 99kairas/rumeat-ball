@@ -104,3 +104,19 @@ func SetOTP(email, otp string) error {
 
 	return nil
 }
+
+func ValidateOTP(email, otp string) (models.User, error) {
+	var data models.User
+
+	tx := database.DB.Where("email = ? AND otp = ?", email, otp).First(&data)
+	if tx.Error != nil {
+		return models.User{}, errors.New("invalid Email or OTP")
+	}
+
+	database.DB.Model(&models.User{}).Where("email = ?", email).Update("OTP", nil).Update("Status", "verified")
+	if tx.Error != nil {
+		return models.User{}, tx.Error
+	}
+
+	return data, nil
+}
