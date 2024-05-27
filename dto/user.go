@@ -27,12 +27,13 @@ type ValidateOTPRequest struct {
 
 type UserRequest struct {
 	Email    string `json:"email" form:"email"`
+	Name     string `json:"name" form:"name"`
 	Password string `json:"password" form:"password"`
 	Address  string `json:"address" form:"address"`
 	Phone    string `json:"phone" form:"phone"`
 }
 type UserResponse struct {
-	ID    uuid.UUID `json:"id"`
+	ID    uuid.UUID `json:"user_id"`
 	Email string    `json:"email"`
 	Token string    `json:"token"`
 }
@@ -41,6 +42,7 @@ func ConvertToUserModel(user UserRequest) models.User {
 	return models.User{
 		ID:       uuid.New(),
 		Email:    user.Email,
+		Name:     user.Name,
 		Password: user.Password,
 		Address:  user.Address,
 		Phone:    user.Phone,
@@ -48,7 +50,8 @@ func ConvertToUserModel(user UserRequest) models.User {
 }
 
 type LoginResponse struct {
-	ID    uuid.UUID `json:"user_id"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
 	Email string    `json:"email"`
 	Token string    `json:"token"`
 }

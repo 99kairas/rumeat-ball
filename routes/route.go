@@ -15,8 +15,10 @@ func New() *echo.Echo {
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
 
+	// USERS
 	e.POST("/users/signup", controllers.SignUpUserController)
 	e.PUT("/users/verify", controllers.ValidateOTP)
+	e.POST("/users/login", controllers.LoginUserController)
 
 	return e
 }

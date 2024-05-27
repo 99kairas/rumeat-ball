@@ -123,7 +123,7 @@ func SignUpUserController(c echo.Context) error {
 		})
 	}
 
-	response := dto.LoginResponse{
+	response := dto.UserResponse{
 		ID:    data.ID,
 		Email: data.Email,
 		Token: token,
@@ -160,4 +160,36 @@ func ValidateOTP(c echo.Context) error {
 		"message":  "success validate otp",
 		"response": response,
 	})
+}
+
+func LoginUserController(c echo.Context) error {
+	var loginReq = dto.LoginRequest{}
+	errBind := c.Bind(&loginReq)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	data, token, err := repositories.CheckUser(loginReq.Email, loginReq.Password)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "fail login",
+			"response": err.Error(),
+		})
+	}
+
+	response := dto.LoginResponse{
+		ID:    data.ID,
+		Name:  data.Name,
+		Email: data.Email,
+		Token: token,
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success login",
+		Response: response,
+	})
+
 }
