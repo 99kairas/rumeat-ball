@@ -48,3 +48,14 @@ func CheckRole(role string) echo.MiddlewareFunc {
 		}
 	}
 }
+
+func ExtractTokenUserId(e echo.Context) uuid.UUID {
+	user := e.Get("user").(*jwt.Token)
+	if user.Valid {
+		claims := user.Claims.(jwt.MapClaims)
+		userId := claims["user_id"].(string)
+		uuid, _ := uuid.Parse(userId)
+		return uuid
+	}
+	return uuid.Nil
+}

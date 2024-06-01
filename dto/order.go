@@ -1,12 +1,13 @@
 package dto
 
-import {
-	"github.com/google/uuid"
+import (
 	"time"
-	}
+
+	"github.com/google/uuid"
+)
 
 type OrderRequest struct {
-	UserID string `json:"user_id" form:"user_id"`
+	UserID string    `json:"user_id" form:"user_id"`
 	Date   time.Time `json:"date" form:"date"`
 }
 

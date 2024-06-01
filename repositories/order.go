@@ -1,5 +1,12 @@
 package repositories
 
+import (
+	"rumeat-ball/database"
+	"rumeat-ball/models"
+
+	"github.com/google/uuid"
+)
+
 func CreateOrder(data models.Order) (models.Order, error) {
 	tx := database.DB.Save(&data)
 	if tx.Error != nil {
