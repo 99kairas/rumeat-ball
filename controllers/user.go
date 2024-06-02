@@ -191,5 +191,99 @@ func LoginUserController(c echo.Context) error {
 		Message:  "success login",
 		Response: response,
 	})
+}
 
+func AdminSignUpController(c echo.Context) error {
+	var payloads = dto.AdminRequest{}
+	errBind := c.Bind(&payloads)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error bind data",
+			Response: errBind.Error(),
+		})
+	}
+
+	validEmail := govalidator.IsEmail(payloads.Email)
+	if !validEmail {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "fail sign up",
+			Response: "email is not valid",
+		})
+	}
+
+	// Pengecekan apakah password memenuhi kriteria
+	if !isStrongPassword(payloads.Password) {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "fail sign up",
+			Response: "password must be at least 8 characters and contain at least 1 uppercase letter and 1 symbol",
+		})
+	}
+
+	emailExist := repositories.CheckUserEmail(payloads.Email)
+	if emailExist {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "fail sign up",
+			Response: "email already exist",
+		})
+	}
+
+	signUpData := dto.ConvertToAdminModel(payloads)
+
+	data, err := repositories.CreateUser(signUpData)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "fail sign up",
+			Response: err.Error(),
+		})
+	}
+
+	data, token, err := repositories.CheckUser(payloads.Email, payloads.Password)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "fail login",
+			Response: err.Error(),
+		})
+	}
+
+	response := dto.UserResponse{
+		ID:    data.ID,
+		Email: data.Email,
+		Token: token,
+	}
+
+	return c.JSON(http.StatusCreated, dto.Response{
+		Message:  "success sign up",
+		Response: response,
+	})
+}
+
+func AdminLoginController(c echo.Context) error {
+	var loginReq = dto.LoginRequest{}
+	errBind := c.Bind(&loginReq)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	data, token, err := repositories.CheckAdmin(loginReq.Email, loginReq.Password)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "fail login",
+			"response": err.Error(),
+		})
+	}
+
+	response := dto.LoginResponse{
+		ID:    data.ID,
+		Name:  data.Name,
+		Email: data.Email,
+		Token: token,
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success login",
+		Response: response,
+	})
 }

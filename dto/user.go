@@ -38,6 +38,19 @@ type UserResponse struct {
 	Token string    `json:"token"`
 }
 
+type AdminRequest struct {
+	Email    string `json:"email" form:"email"`
+	Name     string `json:"name" form:"name"`
+	Password string `json:"password" form:"password"`
+	Address  string `json:"address" form:"address"`
+	Phone    string `json:"phone" form:"phone"`
+}
+type AdminRespose struct {
+	ID    uuid.UUID `json:"user_id"`
+	Email string    `json:"email"`
+	Token string    `json:"token"`
+}
+
 func ConvertToUserModel(user UserRequest) models.User {
 	return models.User{
 		ID:       uuid.New(),
@@ -46,6 +59,17 @@ func ConvertToUserModel(user UserRequest) models.User {
 		Password: user.Password,
 		Address:  user.Address,
 		Phone:    user.Phone,
+	}
+}
+
+func ConvertToAdminModel(admin AdminRequest) models.User {
+	return models.User{
+		ID:       uuid.New(),
+		Email:    admin.Email,
+		Name:     admin.Name,
+		Password: admin.Password,
+		Address:  admin.Address,
+		Phone:    admin.Phone,
 	}
 }
 
