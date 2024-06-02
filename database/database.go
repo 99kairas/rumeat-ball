@@ -5,6 +5,8 @@ import (
 	"rumeat-ball/configs"
 	"rumeat-ball/models"
 
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -16,7 +18,7 @@ var (
 func InitDatabase() {
 	InitDB()
 	InitialMigration()
-	// Seeders()
+	Seeders()
 }
 
 type DbSetup struct {
@@ -62,41 +64,32 @@ func InitialMigration() {
 	)
 }
 
-// func Seeders() {
-// 	// ADMIN SEEDERS
-// 	adminPasswordHash, err := bcrypt.GenerateFromPassword([]byte("Admin@123"), bcrypt.DefaultCost)
+func Seeders() {
+	// ADMIN SEEDERS
+	adminPasswordHash, err := bcrypt.GenerateFromPassword([]byte("Admin@123"), bcrypt.DefaultCost)
 
-// 	if err != nil {
-// 		return
-// 	}
-// 	admin := []models.Admin{
-// 		{
-// 			ID:       uuid.New(),
-// 			Username: "admin1",
-// 			Password: string(adminPasswordHash),
-// 			Name:     "Admin 1",
-// 		},
-// 		{
-// 			ID:       uuid.New(),
-// 			Username: "admin2",
-// 			Password: string(adminPasswordHash),
-// 			Name:     "Admin 2",
-// 		},
-// 		{
-// 			ID:       uuid.New(),
-// 			Username: "admin3",
-// 			Password: string(adminPasswordHash),
-// 			Name:     "Admin 3",
-// 		},
-// 	}
+	if err != nil {
+		return
+	}
+	admin := []models.User{
+		{
+			ID:       uuid.New(),
+			Email:    "admin1@admin.com",
+			Password: string(adminPasswordHash),
+			Name:     "Admin 1",
+			Address:  "Jl. Jendral Sudirman",
+			Phone:    "08123456789",
+			Status:   "verified",
+		},
+	}
 
-// 	for _, v := range admin {
-// 		var exist models.Admin
+	for _, v := range admin {
+		var exist models.User
 
-// 		errCheck := DB.Where("username = ?", v.Username).First(&exist).Error
+		errCheck := DB.Where("email = ?", v.Email).First(&exist).Error
 
-// 		if errCheck != nil {
-// 			DB.Create(&v)
-// 		}
-// 	}
-// }
+		if errCheck != nil {
+			DB.Create(&v)
+		}
+	}
+}

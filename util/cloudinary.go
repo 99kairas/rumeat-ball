@@ -37,7 +37,7 @@ func UploadToCloudinary(fileHeader *multipart.FileHeader) (imageUrl string, err 
 	cld := Credentials()
 
 	resp, err := cld.Upload.Upload(context.Background(), file, uploader.UploadParams{
-		PublicID:       "Reproduction-Health/" + uid.String(),
+		PublicID:       "Rumeat-Ball/" + uid.String(),
 		UniqueFilename: api.Bool(false),
 		Overwrite:      api.Bool(true),
 	})

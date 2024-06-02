@@ -5,7 +5,7 @@ import (
 	"rumeat-ball/configs"
 	"rumeat-ball/dto"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
