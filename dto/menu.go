@@ -65,9 +65,9 @@ func ConvertToUpdateMenuModel(menu UpdateMenuRequest) models.Menu {
 	}
 }
 
-func ConvertToUpdateMenuResponse(menu models.Menu) UpdateMenuResponse {
+func ConvertToUpdateMenuResponse(menu models.Menu, id uuid.UUID) UpdateMenuResponse {
 	return UpdateMenuResponse{
-		ID:          menu.ID,
+		ID:          id,
 		Name:        menu.Name,
 		Description: menu.Description,
 		Image:       menu.Image,

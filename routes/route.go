@@ -28,11 +28,13 @@ func New() *echo.Echo {
 	admin.Use(middleware.JWT([]byte(configs.JWT_KEY)))
 	admin.POST("/signup", controllers.AdminSignUpController, middlewares.CheckRole(configs.ROLE_ADMIN))
 
-	// MENU
+	// ADMIN MENU
 	e.GET("/menu", controllers.GetMenuController)
 	admin.POST("/menu", controllers.CreateMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
 	admin.PUT("/menu/:id", controllers.UpdateMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
 	admin.DELETE("/menu/:id", controllers.DeleteMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
+
+	// ORDER
 
 	return e
 }
