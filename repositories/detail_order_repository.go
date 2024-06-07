@@ -8,7 +8,7 @@ import (
 )
 
 func CreateDetailOrder(data models.DetailOrder) (models.DetailOrder, error) {
-	tx := database.DB.Save(&data)
+	tx := database.DB.Create(&data)
 	if tx.Error != nil {
 		return models.DetailOrder{}, tx.Error
 	}

@@ -21,6 +21,8 @@ func New() *echo.Echo {
 	e.POST("/users/signup", controllers.SignUpUserController)
 	e.PUT("/users/verify", controllers.ValidateOTP)
 	e.POST("/users/login", controllers.LoginUserController)
+	user := e.Group("/users")
+	user.Use(middleware.JWT([]byte(configs.JWT_KEY)))
 
 	// ADMIN
 	e.POST("/admin/login", controllers.AdminLoginController)
@@ -34,7 +36,12 @@ func New() *echo.Echo {
 	admin.PUT("/menu/:id", controllers.UpdateMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
 	admin.DELETE("/menu/:id", controllers.DeleteMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
 
-	// ORDER
+	// USERS ORDER
+	user.POST("/order", controllers.CreateOrderController, middlewares.CheckRole(configs.ROLE_USER))
+	// e.GET("/order", controllers.GetOrdersController)
+	// e.GET("/order/:id", controllers.GetOrderController)
+	// e.PUT("/order/:id", controllers.UpdateOrderController)
+	// e.DELETE("/order/:id", controllers.DeleteOrderController)
 
 	return e
 }
