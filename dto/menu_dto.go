@@ -7,10 +7,11 @@ import (
 )
 
 type CreateMenuRequest struct {
-	Name        string  `json:"name" form:"name"`
-	Description string  `json:"description" form:"description"`
-	Image       string  `json:"image" form:"image"`
-	Price       float64 `json:"price" form:"price"`
+	Name        string    `json:"name" form:"name"`
+	Description string    `json:"description" form:"description"`
+	Image       string    `json:"image" form:"image"`
+	Price       float64   `json:"price" form:"price"`
+	CategoryID  uuid.UUID `json:"category_id" form:"category_id"`
 }
 
 type CreateMenuResponse struct {
@@ -19,13 +20,15 @@ type CreateMenuResponse struct {
 	Description string    `json:"description"`
 	Image       string    `json:"image"`
 	Price       float64   `json:"price"`
+	CategoryID  uuid.UUID `json:"category_id"`
 }
 
 type UpdateMenuRequest struct {
-	Name        string  `json:"name" form:"name"`
-	Description string  `json:"description" form:"description"`
-	Image       string  `json:"image" form:"image"`
-	Price       float64 `json:"price" form:"price"`
+	Name        string    `json:"name" form:"name"`
+	Description string    `json:"description" form:"description"`
+	Image       string    `json:"image" form:"image"`
+	Price       float64   `json:"price" form:"price"`
+	CategoryID  uuid.UUID `json:"category_id" form:"category_id"`
 }
 
 type UpdateMenuResponse struct {
@@ -34,6 +37,7 @@ type UpdateMenuResponse struct {
 	Description string    `json:"description"`
 	Image       string    `json:"image"`
 	Price       float64   `json:"price"`
+	CategoryID  uuid.UUID `json:"category_id"`
 }
 
 type GetMenuResponse struct {
@@ -43,6 +47,7 @@ type GetMenuResponse struct {
 	Image       string    `json:"image"`
 	Price       float64   `json:"price"`
 	Status      string    `json:"status"`
+	CategoryID  uuid.UUID `json:"category_id"`
 }
 
 func ConvertToGetMenuResponse(menu models.Menu) GetMenuResponse {
@@ -53,6 +58,7 @@ func ConvertToGetMenuResponse(menu models.Menu) GetMenuResponse {
 		Image:       menu.Image,
 		Price:       menu.Price,
 		Status:      menu.Status,
+		CategoryID:  menu.CategoryID,
 	}
 }
 
@@ -62,6 +68,7 @@ func ConvertToUpdateMenuModel(menu UpdateMenuRequest) models.Menu {
 		Description: menu.Description,
 		Image:       menu.Image,
 		Price:       menu.Price,
+		CategoryID:  menu.CategoryID,
 	}
 }
 
@@ -72,6 +79,7 @@ func ConvertToUpdateMenuResponse(menu models.Menu, id uuid.UUID) UpdateMenuRespo
 		Description: menu.Description,
 		Image:       menu.Image,
 		Price:       menu.Price,
+		CategoryID:  menu.CategoryID,
 	}
 }
 
@@ -83,6 +91,7 @@ func ConvertToCreateMenuModel(menu CreateMenuRequest) models.Menu {
 		Image:       menu.Image,
 		Price:       menu.Price,
 		Status:      "available",
+		CategoryID:  menu.CategoryID,
 	}
 }
 
@@ -93,5 +102,6 @@ func ConvertToCreateMenuResponse(menu models.Menu) CreateMenuResponse {
 		Description: menu.Description,
 		Image:       menu.Image,
 		Price:       menu.Price,
+		CategoryID:  menu.CategoryID,
 	}
 }

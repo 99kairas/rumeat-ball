@@ -8,38 +8,43 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateMenu(data models.Menu) (models.Menu, error) {
-	tx := database.DB.Save(&data)
-	if tx.Error != nil {
-		return models.Menu{}, tx.Error
-	}
-	return data, nil
+func CreateMenu(menu models.Menu) (models.Menu, error) {
+	err := database.DB.Create(&menu).Error
+	return menu, err
 }
 
-func GetMenu() ([]models.Menu, error) {
+func GetMenu(name string, categoryID uuid.UUID) ([]models.Menu, error) {
 	var data []models.Menu
-	tx := database.DB.Find(&data)
-	if tx.Error != nil {
-		return []models.Menu{}, tx.Error
+	tx := database.DB
+
+	if name != "" {
+		tx = tx.Where("name LIKE ?", "%"+name+"%")
+	}
+	if categoryID != uuid.Nil {
+		tx = tx.Where("category_id = ?", categoryID)
+	}
+
+	err := tx.Find(&data).Error
+	if err != nil {
+		return []models.Menu{}, err
 	}
 	return data, nil
 }
 
-func GetMenuByID(id uuid.UUID) (models.Menu, error) {
-	var data models.Menu
-	tx := database.DB.Where("id = ?", id).First(&data)
-	if tx.Error != nil {
-		return models.Menu{}, tx.Error
-	}
-	return data, nil
+func UpdateMenu(menu models.Menu, id uuid.UUID) (models.Menu, error) {
+	err := database.DB.Model(&menu).Where("id = ?", id).Updates(&menu).Error
+	return menu, err
 }
 
 func DeleteMenu(id uuid.UUID) error {
-	tx := database.DB.Delete(&models.Menu{}, "id = ?", id)
-	if tx.Error != nil {
-		return tx.Error
-	}
-	return nil
+	err := database.DB.Delete(&models.Menu{}, "id = ?", id).Error
+	return err
+}
+
+func GetCategoryByID(id uuid.UUID) (models.Category, error) {
+	var category models.Category
+	err := database.DB.First(&category, "id = ?", id).Error
+	return category, err
 }
 
 func PermanentlyDeleteOldMenus(olderThan time.Duration) error {
@@ -48,10 +53,10 @@ func PermanentlyDeleteOldMenus(olderThan time.Duration) error {
 	return tx.Error
 }
 
-func UpdateMenu(data models.Menu, id uuid.UUID) (models.Menu, error) {
-	tx := database.DB.Where("id = ?", id).Updates(&data)
-	if tx.Error != nil {
-		return models.Menu{}, tx.Error
+func GetMenuByID(id uuid.UUID) (models.Menu, error) {
+	var menu models.Menu
+	if err := database.DB.Where("id = ?", id).First(&menu).Error; err != nil {
+		return models.Menu{}, err
 	}
-	return data, nil
+	return menu, nil
 }

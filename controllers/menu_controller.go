@@ -12,11 +12,11 @@ import (
 )
 
 func CreateMenuController(c echo.Context) error {
-	menu := m.ExtractTokenUserId(c)
-	if menu == uuid.Nil {
+	userID := m.ExtractTokenUserId(c)
+	if userID == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, dto.Response{
 			Message:  "unauthorized",
-			Response: "permision denied: user is not valid",
+			Response: "permission denied: user is not valid",
 		})
 	}
 
@@ -27,7 +27,14 @@ func CreateMenuController(c echo.Context) error {
 			Message:  "error bind data",
 			Response: errBind.Error(),
 		})
+	}
 
+	// Ensure category exists
+	if _, err := repositories.GetCategoryByID(menuReq.CategoryID); err != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "invalid category ID",
+			Response: "category not found",
+		})
 	}
 
 	menuData := dto.ConvertToCreateMenuModel(menuReq)
@@ -38,7 +45,6 @@ func CreateMenuController(c echo.Context) error {
 				Message:  "error upload menu image",
 				Response: err.Error(),
 			})
-
 		}
 
 		menuURL, err := util.UploadToCloudinary(menuImage)
@@ -47,7 +53,6 @@ func CreateMenuController(c echo.Context) error {
 				Message:  "error upload menu image to Cloudinary",
 				Response: err.Error(),
 			})
-
 		}
 		menuData.Image = menuURL
 	}
@@ -58,21 +63,32 @@ func CreateMenuController(c echo.Context) error {
 			Message:  "error create menu",
 			Response: err.Error(),
 		})
-
 	}
 
 	menuResponse := dto.ConvertToCreateMenuResponse(responseData)
 
-	return c.JSON(http.StatusOK, dto.Response{
-
+	return c.JSON(http.StatusCreated, dto.Response{
 		Message:  "success create menu",
 		Response: menuResponse,
 	})
-
 }
 
 func GetMenuController(c echo.Context) error {
-	data, err := repositories.GetMenu()
+	menuName := c.FormValue("name")
+	categoryIDStr := c.FormValue("category_id")
+	var categoryID uuid.UUID
+	if categoryIDStr != "" {
+		var err error
+		categoryID, err = uuid.Parse(categoryIDStr)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, dto.Response{
+				Message:  "invalid category ID",
+				Response: err.Error(),
+			})
+		}
+	}
+
+	data, err := repositories.GetMenu(menuName, categoryID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.Response{
 			Message:  "error get menu",
@@ -91,16 +107,40 @@ func GetMenuController(c echo.Context) error {
 	})
 }
 
-func UpdateMenuController(c echo.Context) error {
-	menu := m.ExtractTokenUserId(c)
-	if menu == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, dto.Response{
-			Message:  "unauthorized",
-			Response: "permision denied: user is not valid",
+func GetMenuByIDController(c echo.Context) error {
+	menuID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
-	uuid, err := uuid.Parse(c.Param("id"))
+	data, err := repositories.GetMenuByID(menuID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error get menu",
+			Response: err.Error(),
+		})
+	}
+
+	menuData := dto.ConvertToGetMenuResponse(data)
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success get menu",
+		Response: menuData,
+	})
+}
+
+func UpdateMenuController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	menuID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error parse id",
@@ -114,6 +154,14 @@ func UpdateMenuController(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.Response{
 			Message:  "error bind data",
 			Response: errBind.Error(),
+		})
+	}
+
+	// Ensure category exists
+	if _, err := repositories.GetCategoryByID(menuReq.CategoryID); err != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "invalid category ID",
+			Response: "category not found",
 		})
 	}
 
@@ -135,14 +183,14 @@ func UpdateMenuController(c echo.Context) error {
 		}
 		menuData.Image = menuURL
 	}
-	responseData, err := repositories.UpdateMenu(menuData, uuid)
+	responseData, err := repositories.UpdateMenu(menuData, menuID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.Response{
 			Message:  "error update menu",
 			Response: err.Error(),
 		})
 	}
-	menuResponse := dto.ConvertToUpdateMenuResponse(responseData, uuid)
+	menuResponse := dto.ConvertToUpdateMenuResponse(responseData, menuID)
 	return c.JSON(http.StatusOK, dto.Response{
 		Message:  "success update menu",
 		Response: menuResponse,
@@ -150,15 +198,15 @@ func UpdateMenuController(c echo.Context) error {
 }
 
 func DeleteMenuController(c echo.Context) error {
-	menu := m.ExtractTokenUserId(c)
-	if menu == uuid.Nil {
+	userID := m.ExtractTokenUserId(c)
+	if userID == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, dto.Response{
 			Message:  "unauthorized",
-			Response: "permision denied: user is not valid",
+			Response: "permission denied: user is not valid",
 		})
 	}
 
-	uuid, err := uuid.Parse(c.Param("id"))
+	menuID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error parse id",
@@ -166,7 +214,7 @@ func DeleteMenuController(c echo.Context) error {
 		})
 	}
 
-	err = repositories.DeleteMenu(uuid)
+	err = repositories.DeleteMenu(menuID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.Response{
 			Message:  "error delete menu",

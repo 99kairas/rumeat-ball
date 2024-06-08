@@ -24,6 +24,23 @@ func New() *echo.Echo {
 	user := e.Group("/users")
 	user.Use(middleware.JWT([]byte(configs.JWT_KEY)))
 
+	// USERS ORDER
+	user.POST("/order", controllers.CreateOrderController, middlewares.CheckRole(configs.ROLE_USER))
+	// e.GET("/order", controllers.GetOrdersController)
+	// e.GET("/order/:id", controllers.GetOrderController)
+	// e.PUT("/order/:id", controllers.UpdateOrderController)
+	// e.DELETE("/order/:id", controllers.DeleteOrderController)
+
+	// USERS MENU
+	e.GET("/menu", controllers.GetMenuController)
+	e.GET("/menu/:id", controllers.GetMenuByIDController)
+
+	// USERS CATEGORY MENU
+	e.GET("/category", controllers.GetCategoriesController)
+	e.GET("/category/:id", controllers.GetCategoryByIDController)
+
+	// ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
 	// ADMIN
 	e.POST("/admin/login", controllers.AdminLoginController)
 	admin := e.Group("/admin")
@@ -32,16 +49,17 @@ func New() *echo.Echo {
 
 	// ADMIN MENU
 	e.GET("/menu", controllers.GetMenuController)
+	e.GET("/menu/:id", controllers.GetMenuByIDController)
 	admin.POST("/menu", controllers.CreateMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
 	admin.PUT("/menu/:id", controllers.UpdateMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
 	admin.DELETE("/menu/:id", controllers.DeleteMenuController, middlewares.CheckRole(configs.ROLE_ADMIN))
 
-	// USERS ORDER
-	user.POST("/order", controllers.CreateOrderController, middlewares.CheckRole(configs.ROLE_USER))
-	// e.GET("/order", controllers.GetOrdersController)
-	// e.GET("/order/:id", controllers.GetOrderController)
-	// e.PUT("/order/:id", controllers.UpdateOrderController)
-	// e.DELETE("/order/:id", controllers.DeleteOrderController)
+	// ADMIN CATEGORY MENU
+	e.GET("/category", controllers.GetCategoriesController)
+	e.GET("/category/:id", controllers.GetCategoryByIDController)
+	admin.POST("/category", controllers.CreateCategoryController, middlewares.CheckRole(configs.ROLE_ADMIN))
+	admin.PUT("/category/:id", controllers.UpdateCategoryController, middlewares.CheckRole(configs.ROLE_ADMIN))
+	admin.DELETE("/category/:id", controllers.DeleteCategoryController, middlewares.CheckRole(configs.ROLE_ADMIN))
 
 	return e
 }
