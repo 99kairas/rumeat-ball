@@ -39,6 +39,10 @@ func New() *echo.Echo {
 	e.GET("/category", controllers.GetCategoriesController)
 	e.GET("/category/:id", controllers.GetCategoryByIDController)
 
+	// USERS TRANSACTION
+
+	// USERS RATINGS
+
 	// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	// ADMIN
@@ -60,6 +64,10 @@ func New() *echo.Echo {
 	admin.POST("/category", controllers.CreateCategoryController, middlewares.CheckRole(configs.ROLE_ADMIN))
 	admin.PUT("/category/:id", controllers.UpdateCategoryController, middlewares.CheckRole(configs.ROLE_ADMIN))
 	admin.DELETE("/category/:id", controllers.DeleteCategoryController, middlewares.CheckRole(configs.ROLE_ADMIN))
+
+	// ADMIN TRANSACTIONS
+
+	// ADMIN RATINGS MANAGEMENT
 
 	return e
 }
