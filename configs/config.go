@@ -7,18 +7,20 @@ import (
 )
 
 var (
-	JWT_KEY       string
-	DB_USERNAME   string
-	DB_PASSWORD   string
-	DB_PORT       string
-	DB_HOST       string
-	DB_NAME       string
-	DB_NAME_TEST  string
-	SMTP_HOST     string
-	SMTP_PORT     string
-	SENDER_NAME   string
-	AUTH_EMAIL    string
-	AUTH_PASSWORD string
+	JWT_KEY             string
+	DB_USERNAME         string
+	DB_PASSWORD         string
+	DB_PORT             string
+	DB_HOST             string
+	DB_NAME             string
+	DB_NAME_TEST        string
+	SMTP_HOST           string
+	SMTP_PORT           string
+	SENDER_NAME         string
+	AUTH_EMAIL          string
+	AUTH_PASSWORD       string
+	MIDTRANS_SERVER_KEY string
+	MIDTRANS_CLIENT_KEY string
 )
 
 func Init() {
@@ -36,4 +38,6 @@ func Init() {
 	SENDER_NAME = os.Getenv("SENDER_NAME")
 	AUTH_EMAIL = os.Getenv("AUTH_EMAIL")
 	AUTH_PASSWORD = os.Getenv("AUTH_PASSWORD")
+	MIDTRANS_SERVER_KEY = os.Getenv("MIDTRANS_SERVER_KEY")
+	MIDTRANS_CLIENT_KEY = os.Getenv("MIDTRANS_CLIENT_KEY")
 }
