@@ -21,6 +21,7 @@ func New() *echo.Echo {
 	e.POST("/users/signup", controllers.SignUpUserController)
 	e.PUT("/users/verify", controllers.ValidateOTP)
 	e.POST("/users/login", controllers.LoginUserController)
+	e.POST("/users/resend-otp", controllers.ResendOTPController)
 	user := e.Group("/users")
 	user.Use(middleware.JWT([]byte(configs.JWT_KEY)))
 
@@ -42,6 +43,8 @@ func New() *echo.Echo {
 	// USERS TRANSACTION
 
 	// USERS RATINGS
+
+	// USERS PROFILE
 
 	// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 

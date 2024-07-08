@@ -287,3 +287,83 @@ func AdminLoginController(c echo.Context) error {
 		Response: response,
 	})
 }
+
+func ResendOTPController(c echo.Context) error {
+	var payloads = dto.OTPRequest{}
+	errBind := c.Bind(&payloads)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error bind data",
+			Response: errBind.Error(),
+		})
+	}
+
+	emailExist := repositories.CheckUserEmail(payloads.Email)
+	if !emailExist {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "fail resend otp",
+			Response: "email not found",
+		})
+	}
+
+	otp := fmt.Sprint(rand.Intn(999999-100000) + 100000)
+
+	err := repositories.SetVerificationOTP(payloads.Email, otp)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "failed set otp",
+			Response: err.Error(),
+		})
+	}
+
+	emailBody, err := templates.RenderOTPTemplate(otp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed render otp template",
+			Response: err.Error(),
+		})
+	}
+
+	err = configs.SendMail(payloads.Email, "Rumeat Ball OTP", emailBody)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed send email",
+			Response: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message: "success resend otp",
+	})
+}
+
+// func ChangePasswordController(c echo.Context) error {
+// 	var payloads = dto.ChangePasswordRequest{}
+// 	errBind := c.Bind(&payloads)
+// 	if errBind != nil {
+// 		return c.JSON(http.StatusBadRequest, dto.Response{
+// 			Message:  "error bind data",
+// 			Response: errBind.Error(),
+// 		})
+// 	}
+
+// 	emailExist := repositories.CheckUserEmail(payloads.Email)
+// 	if !emailExist {
+// 		return c.JSON(http.StatusBadRequest, dto.Response{
+// 			Message:  "fail change password",
+// 			Response: "email not found",
+// 		})
+// 	}
+
+// 	err := repositories.ChangePassword(payloads.Email, payloads.Password)
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, dto.Response{
+// 			Message:  "failed change password",
+// 			Response: err.Error(),
+// 		})
+// 	}
+
+// 	return c.JSON(http.StatusOK, dto.Response{
+// 		Message: "success change password",
+// 	})
+// }

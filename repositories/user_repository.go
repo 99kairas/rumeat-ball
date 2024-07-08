@@ -120,3 +120,31 @@ func ValidateOTP(email, otp string) (models.User, error) {
 
 	return data, nil
 }
+
+func ResetPassword(email, password string) error {
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	password = string(hashPassword)
+
+	tx := database.DB.Model(&models.User{}).Where("email = ?", email).Update("password", password)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
+// func ChangePassword(email, password string) error {
+// 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	password = string(hashPassword)
+
+// 	tx := database.DB.Model(&models.User{}).Where("email = ?", email).Update("password", password)
+// 	if tx.Error != nil {
+// 		return tx.Error
+// 	}
+// 	return nil
+// }
