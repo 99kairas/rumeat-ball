@@ -56,11 +56,11 @@ func InitDB() {
 func InitialMigration() {
 	DB.AutoMigrate(
 		&models.User{},
-		&models.DetailOrder{},
 		&models.Menu{},
 		&models.Order{},
 		&models.Transaction{},
 		&models.Rating{},
+		&models.DetailOrder{},
 	)
 }
 
