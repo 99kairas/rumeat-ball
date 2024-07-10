@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"rumeat-ball/dto"
 	m "rumeat-ball/middlewares"
@@ -13,6 +14,9 @@ import (
 
 func CreateOrderController(c echo.Context) error {
 	userID := m.ExtractTokenUserId(c)
+	fmt.Print("ini adalah user id ", userID)
+	// userID := "74c89fe0-0f95-40d8-9912-fd181dfaf7d5"
+
 	if userID == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, dto.Response{
 			Message:  "unauthorized",
@@ -29,7 +33,7 @@ func CreateOrderController(c echo.Context) error {
 		})
 	}
 
-	orderData := dto.ConvertToOrderModel(orderReq)
+	orderData := dto.ConvertToOrderModel(orderReq, userID)
 	orderData.ID = uuid.New()
 
 	// Calculate total price
@@ -47,10 +51,12 @@ func CreateOrderController(c echo.Context) error {
 
 		totalItemPrice := float64(item.Quantity) * menu.Price
 		totalOrderPrice += totalItemPrice
+		fmt.Print(userID)
 
 		// Add item to order items for response
 		orderItems = append(orderItems, dto.OrderItem{
 			MenuID:       item.MenuID,
+			UserID:       userID,
 			Quantity:     item.Quantity,
 			PricePerItem: menu.Price,
 			TotalPrice:   totalItemPrice,
@@ -87,7 +93,7 @@ func CreateOrderController(c echo.Context) error {
 	}
 
 	// Convert To Response
-	orderResponse := dto.ConvertToOrderResponse(order, orderItems)
+	orderResponse := dto.ConvertToOrderResponse(order, orderItems, userID)
 
 	return c.JSON(http.StatusCreated, dto.Response{
 		Message:  "success create order",

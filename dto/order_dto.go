@@ -13,6 +13,7 @@ type OrderRequest struct {
 
 type OrderItem struct {
 	MenuID       uuid.UUID `json:"menu_id"`
+	UserID       uuid.UUID `json:"user_id"`
 	Quantity     int       `json:"quantity"`
 	PricePerItem float64   `json:"price_per_item"`
 	TotalPrice   float64   `json:"total_price"`
@@ -20,24 +21,27 @@ type OrderItem struct {
 
 type OrderResponse struct {
 	ID     uuid.UUID   `json:"id"`
+	UserID uuid.UUID   `json:"user_id"`
 	Status string      `json:"status"`
 	Date   string      `json:"date"`
 	Total  float64     `json:"total"`
 	Items  []OrderItem `json:"items"`
 }
 
-func ConvertToOrderModel(req OrderRequest) models.Order {
+func ConvertToOrderModel(req OrderRequest, userID uuid.UUID) models.Order {
 	return models.Order{
 		ID:     uuid.New(),
+		UserID: userID,
 		Date:   time.Now(),
 		Status: "processed",
 	}
 }
 
-func ConvertToOrderResponse(order models.Order, items []OrderItem) OrderResponse {
+func ConvertToOrderResponse(order models.Order, items []OrderItem, userID uuid.UUID) OrderResponse {
 	dateFormat := time.Now().Format("02 January 2006")
 	return OrderResponse{
 		ID:     order.ID,
+		UserID: userID,
 		Status: order.Status,
 		Date:   dateFormat,
 		Total:  order.Total,
