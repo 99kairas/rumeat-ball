@@ -27,7 +27,7 @@ func New() *echo.Echo {
 
 	// USERS ORDER
 	user.POST("/order", controllers.CreateOrderController, middlewares.CheckRole(configs.ROLE_USER))
-	// e.GET("/order", controllers.GetOrdersController)
+	user.GET("/order", controllers.GetAllOrdersController, middlewares.CheckRole(configs.ROLE_USER))
 	// e.GET("/order/:id", controllers.GetOrderController)
 	// e.PUT("/order/:id", controllers.UpdateOrderController)
 	// e.DELETE("/order/:id", controllers.DeleteOrderController)

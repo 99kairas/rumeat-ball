@@ -100,3 +100,114 @@ func CreateOrderController(c echo.Context) error {
 		Response: orderResponse,
 	})
 }
+
+func GetAllOrdersController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	orders, err := repositories.GetOrdersByUserID(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error fetching order data",
+			Response: err.Error(),
+		})
+	}
+
+	// Convert To Response
+	var orderResponses []dto.OrderResponse
+	for _, order := range orders {
+		orderItems, err := repositories.GetOrderItemsByOrderID(order.ID, userID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, dto.Response{
+				Message:  "error fetching order items data",
+				Response: err.Error(),
+			})
+		}
+		orderResponse := dto.ConvertToOrderResponse(order, orderItems, userID)
+		orderResponses = append(orderResponses, orderResponse)
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message: "success get all orders",
+		Response: map[string]any{
+			"orders": orderResponses,
+		},
+	})
+}
+
+// func GetOrderByOrderIDController(c echo.Context) error {
+// 	userID := m.ExtractTokenUserId(c)
+// 	if userID == uuid.Nil {
+// 		return c.JSON(http.StatusUnauthorized, dto.Response{
+// 			Message:  "unauthorized",
+// 			Response: "permission denied: user is not valid",
+// 		})
+// 	}
+
+// 	orderID, err := uuid.Parse(c.Param("id"))
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, dto.Response{
+// 			Message:  "error parse id",
+// 			Response: err.Error(),
+// 		})
+// 	}
+
+// 	order, err := repositories.GetOrderByOrderID(orderID)
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, dto.Response{
+// 			Message:  "error fetching order data",
+// 			Response: err.Error(),
+// 		})
+// 	}
+
+// 	// Convert To Response
+// 	orderItems, err := repositories.GetOrderItemsByOrderID(orderID, userID)
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, dto.Response{
+// 			Message:  "error fetching order items data",
+// 			Response: err.Error(),
+// 		})
+// 	}
+// 	orderResponse := dto.ConvertToOrderResponse(order, orderItems, userID)
+
+// 	return c.JSON(http.StatusOK, dto.Response{
+// 		Message:  "success get order by id",
+// 		Response: orderResponse,
+// 	})
+// }
+
+// func CancelOrderController(c echo.Context) error {
+// 	userID := m.ExtractTokenUserId(c)
+// 	if userID == uuid.Nil {
+// 		return c.JSON(http.StatusUnauthorized, dto.Response{
+// 			Message:  "unauthorized",
+// 			Response: "permission denied: user is not valid",
+// 		})
+// 	}
+
+// 	orderID, err := uuid.Parse(c.Param("id"))
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, dto.Response{
+// 			Message:  "error parse id",
+// 			Response: err.Error(),
+// 		})
+// 	}
+
+// 	err = repositories.CancelOrder(orderID)
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, dto.Response{
+// 			Message:  "error cancel order",
+// 			Response: err.Error(),
+// 		})
+// 	}
+
+// 	return c.JSON(http.StatusOK, dto.Response{
+// 		Message:  "success cancel order",
+// 		Response: nil,
+// 	})
+// }
