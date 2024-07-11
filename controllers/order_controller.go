@@ -140,46 +140,46 @@ func GetAllOrdersController(c echo.Context) error {
 	})
 }
 
-// func GetOrderByOrderIDController(c echo.Context) error {
-// 	userID := m.ExtractTokenUserId(c)
-// 	if userID == uuid.Nil {
-// 		return c.JSON(http.StatusUnauthorized, dto.Response{
-// 			Message:  "unauthorized",
-// 			Response: "permission denied: user is not valid",
-// 		})
-// 	}
+func GetOrderByIDController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
 
-// 	orderID, err := uuid.Parse(c.Param("id"))
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "error parse id",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	orderID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error parse id",
+			Response: err.Error(),
+		})
+	}
 
-// 	order, err := repositories.GetOrderByOrderID(orderID)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, dto.Response{
-// 			Message:  "error fetching order data",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	order, err := repositories.GetOrderByOrderID(orderID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error fetching order data",
+			Response: err.Error(),
+		})
+	}
 
-// 	// Convert To Response
-// 	orderItems, err := repositories.GetOrderItemsByOrderID(orderID, userID)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, dto.Response{
-// 			Message:  "error fetching order items data",
-// 			Response: err.Error(),
-// 		})
-// 	}
-// 	orderResponse := dto.ConvertToOrderResponse(order, orderItems, userID)
+	// Convert To Response
+	orderItems, err := repositories.GetOrderItemsByOrderID(orderID, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error fetching order items data",
+			Response: err.Error(),
+		})
+	}
+	orderResponse := dto.ConvertToOrderResponse(order, orderItems, userID)
 
-// 	return c.JSON(http.StatusOK, dto.Response{
-// 		Message:  "success get order by id",
-// 		Response: orderResponse,
-// 	})
-// }
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success get order by id",
+		Response: orderResponse,
+	})
+}
 
 // func CancelOrderController(c echo.Context) error {
 // 	userID := m.ExtractTokenUserId(c)

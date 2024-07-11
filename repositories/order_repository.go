@@ -68,20 +68,20 @@ func GetOrderByMenuID(id uuid.UUID) ([]models.Order, error) {
 	return data, nil
 }
 
-func GetOrderByOrderID(id uuid.UUID) ([]models.Order, error) {
+func GetOrderByStatus(status string) ([]models.Order, error) {
 	var data []models.Order
-	tx := database.DB.Where("order_id = ?", id).Find(&data)
+	tx := database.DB.Where("status = ?", status).Find(&data)
 	if tx.Error != nil {
 		return []models.Order{}, tx.Error
 	}
 	return data, nil
 }
 
-func GetOrderByStatus(status string) ([]models.Order, error) {
-	var data []models.Order
-	tx := database.DB.Where("status = ?", status).Find(&data)
+func GetOrderByOrderID(id uuid.UUID) (models.Order, error) {
+	var data models.Order
+	tx := database.DB.Where("id = ?", id).First(&data)
 	if tx.Error != nil {
-		return []models.Order{}, tx.Error
+		return models.Order{}, tx.Error
 	}
 	return data, nil
 }
