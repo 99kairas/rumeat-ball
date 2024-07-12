@@ -151,3 +151,13 @@ func CancelOrder(orderID uuid.UUID) error {
 	}
 	return nil
 }
+
+func DeleteDetailOrdersByOrderID(orderID string) error {
+	tx := database.DB.Where("order_id = ?", orderID).Delete(&models.DetailOrder{})
+	return tx.Error
+}
+
+func UpdateOrderCart(order models.Order) (models.Order, error) {
+	tx := database.DB.Save(&order)
+	return order, tx.Error
+}

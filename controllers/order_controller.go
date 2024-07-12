@@ -207,3 +207,113 @@ func CancelOrderController(c echo.Context) error {
 		Response: nil,
 	})
 }
+
+func UpdateOrderController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	orderID := c.Param("id")
+
+	var orderReq = dto.OrderRequest{}
+	errBind := c.Bind(&orderReq)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error bind data",
+			Response: errBind.Error(),
+		})
+	}
+
+	order, err := repositories.GetOrderByOrderID(orderID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error fetching order data",
+			Response: err.Error(),
+		})
+	}
+
+	if order.Status != "cart" {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error update order",
+			Response: "order cannot be updated as it is not in cart status",
+		})
+	}
+
+	// Delete existing detail orders for this order
+	err = repositories.DeleteDetailOrdersByOrderID(orderID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error deleting old order items",
+			Response: err.Error(),
+		})
+	}
+
+	// Calculate total price
+	var totalOrderPrice float64
+	var orderItems []dto.OrderItem
+
+	for _, item := range orderReq.Items {
+		menu, err := repositories.GetMenuByID(item.MenuID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, dto.Response{
+				Message:  "error fetching menu data",
+				Response: err.Error(),
+			})
+		}
+
+		totalItemPrice := float64(item.Quantity) * menu.Price
+		totalOrderPrice += totalItemPrice
+		fmt.Print(userID)
+
+		// Add item to order items for response
+		orderItems = append(orderItems, dto.OrderItem{
+			MenuID:       item.MenuID,
+			UserID:       userID,
+			Quantity:     item.Quantity,
+			PricePerItem: menu.Price,
+			TotalPrice:   totalItemPrice,
+		})
+	}
+
+	order.Total = totalOrderPrice
+
+	// Update order total price
+	_, err = repositories.UpdateOrderCart(order)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error updating order",
+			Response: err.Error(),
+		})
+	}
+
+	// Create new detail orders
+	for _, item := range orderItems { // Use orderItems to ensure PricePerItem is set
+		detailOrder := models.DetailOrder{
+			ID:         uuid.New(),
+			OrderID:    order.ID,
+			MenuID:     item.MenuID,
+			Quantity:   item.Quantity,
+			TotalPrice: item.TotalPrice, // Calculate total price based on the Menu price and quantity
+		}
+		_, err = repositories.CreateDetailOrder(detailOrder)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, dto.Response{
+				Message:  "error creating detail order",
+				Response: err.Error(),
+			})
+		}
+	}
+
+	// Convert To Response
+	orderResponse := dto.ConvertToOrderResponse(order, orderItems, userID)
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success update order",
+		Response: orderResponse,
+	})
+}
