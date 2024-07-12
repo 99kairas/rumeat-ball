@@ -119,3 +119,12 @@ func GetOrderItemsByOrderID(orderID, userID uuid.UUID) ([]dto.OrderItem, error) 
 	}
 	return items, nil
 }
+
+func CancelOrder(orderID uuid.UUID) error {
+	// CHANGE STATUS TO CANCELED
+	tx := database.DB.Model(&models.Order{}).Where("id = ?", orderID).Update("status", "cancelled").Delete(&models.Order{})
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}

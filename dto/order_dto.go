@@ -33,12 +33,12 @@ func ConvertToOrderModel(req OrderRequest, userID uuid.UUID) models.Order {
 		ID:     uuid.New(),
 		UserID: userID,
 		Date:   time.Now(),
-		Status: "processed",
+		Status: "cart",
 	}
 }
 
 func ConvertToOrderResponse(order models.Order, items []OrderItem, userID uuid.UUID) OrderResponse {
-	dateFormat := order.Date.Format("02 January 2006") // Using order.Date instead of time.Now()
+	dateFormat := order.Date.Format("02 January 2006 15:04") // Using order.Date instead of time.Now()
 	return OrderResponse{
 		ID:     order.ID,
 		UserID: userID,

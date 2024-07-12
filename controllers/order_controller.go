@@ -15,7 +15,6 @@ import (
 func CreateOrderController(c echo.Context) error {
 	userID := m.ExtractTokenUserId(c)
 	fmt.Print("ini adalah user id ", userID)
-	// userID := "74c89fe0-0f95-40d8-9912-fd181dfaf7d5"
 
 	if userID == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, dto.Response{
@@ -181,33 +180,33 @@ func GetOrderByIDController(c echo.Context) error {
 	})
 }
 
-// func CancelOrderController(c echo.Context) error {
-// 	userID := m.ExtractTokenUserId(c)
-// 	if userID == uuid.Nil {
-// 		return c.JSON(http.StatusUnauthorized, dto.Response{
-// 			Message:  "unauthorized",
-// 			Response: "permission denied: user is not valid",
-// 		})
-// 	}
+func CancelOrderController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
 
-// 	orderID, err := uuid.Parse(c.Param("id"))
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "error parse id",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	orderID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error parse id",
+			Response: err.Error(),
+		})
+	}
 
-// 	err = repositories.CancelOrder(orderID)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, dto.Response{
-// 			Message:  "error cancel order",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	err = repositories.CancelOrder(orderID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error cancel order",
+			Response: err.Error(),
+		})
+	}
 
-// 	return c.JSON(http.StatusOK, dto.Response{
-// 		Message:  "success cancel order",
-// 		Response: nil,
-// 	})
-// }
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success cancel order",
+		Response: nil,
+	})
+}
