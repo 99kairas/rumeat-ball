@@ -20,7 +20,7 @@ type OrderItem struct {
 }
 
 type OrderResponse struct {
-	ID     uuid.UUID   `json:"id"`
+	ID     string      `json:"id"`
 	UserID uuid.UUID   `json:"user_id"`
 	Status string      `json:"status"`
 	Date   string      `json:"date"`
@@ -30,7 +30,6 @@ type OrderResponse struct {
 
 func ConvertToOrderModel(req OrderRequest, userID uuid.UUID) models.Order {
 	return models.Order{
-		ID:     uuid.New(),
 		UserID: userID,
 		Date:   time.Now(),
 		Status: "cart",

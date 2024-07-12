@@ -1,18 +1,41 @@
 package repositories
 
 import (
+	"errors"
 	"rumeat-ball/database"
 	"rumeat-ball/dto"
 	"rumeat-ball/models"
+	"rumeat-ball/util"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func CreateOrder(data models.Order) (models.Order, error) {
-	tx := database.DB.Save(&data)
-	if tx.Error != nil {
-		return models.Order{}, tx.Error
+	for {
+		// Generate new Order ID
+		orderID, err := util.GenerateOrderID("RB")
+		if err != nil {
+			return models.Order{}, err
+		}
+
+		// Cek apakah order ID sudah ada dalam database
+		var existingOrder models.Order
+		tx := database.DB.Where("id = ?", orderID).First(&existingOrder)
+		if tx.Error != nil {
+			if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+				// Jika tidak ditemukan, set order ID dan simpan data order
+				data.ID = orderID
+				tx = database.DB.Save(&data)
+				if tx.Error != nil {
+					return models.Order{}, tx.Error
+				}
+				break
+			}
+			return models.Order{}, tx.Error
+		}
 	}
+
 	return data, nil
 }
 
@@ -77,7 +100,7 @@ func GetOrderByStatus(status string) ([]models.Order, error) {
 	return data, nil
 }
 
-func GetOrderByOrderID(id uuid.UUID) (models.Order, error) {
+func GetOrderByOrderID(id string) (models.Order, error) {
 	var data models.Order
 	tx := database.DB.Where("id = ?", id).First(&data)
 	if tx.Error != nil {
@@ -95,7 +118,7 @@ func GetOrdersByUserID(userID uuid.UUID) ([]models.Order, error) {
 	return orders, nil
 }
 
-func GetOrderItemsByOrderID(orderID, userID uuid.UUID) ([]dto.OrderItem, error) {
+func GetOrderItemsByOrderID(orderID string, userID uuid.UUID) ([]dto.OrderItem, error) {
 	var orderItems []models.DetailOrder
 	tx := database.DB.Where("order_id = ?", orderID).Find(&orderItems)
 	if tx.Error != nil {

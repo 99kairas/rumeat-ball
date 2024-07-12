@@ -14,7 +14,6 @@ import (
 
 func CreateOrderController(c echo.Context) error {
 	userID := m.ExtractTokenUserId(c)
-	fmt.Print("ini adalah user id ", userID)
 
 	if userID == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, dto.Response{
@@ -31,9 +30,7 @@ func CreateOrderController(c echo.Context) error {
 			Response: errBind.Error(),
 		})
 	}
-
 	orderData := dto.ConvertToOrderModel(orderReq, userID)
-	orderData.ID = uuid.New()
 
 	// Calculate total price
 	var totalOrderPrice float64
@@ -148,11 +145,11 @@ func GetOrderByIDController(c echo.Context) error {
 		})
 	}
 
-	orderID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
+	orderID := c.Param("id")
+	if orderID == "" {
 		return c.JSON(http.StatusBadRequest, dto.Response{
 			Message:  "error parse id",
-			Response: err.Error(),
+			Response: "order id is invalid",
 		})
 	}
 
@@ -165,7 +162,7 @@ func GetOrderByIDController(c echo.Context) error {
 	}
 
 	// Convert To Response
-	orderItems, err := repositories.GetOrderItemsByOrderID(orderID, userID)
+	orderItems, err := repositories.GetOrderItemsByOrderID(order.ID, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.Response{
 			Message:  "error fetching order items data",
