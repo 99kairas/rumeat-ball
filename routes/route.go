@@ -48,6 +48,7 @@ func New() *echo.Echo {
 	// USERS PROFILE
 	user.GET("/profile", controllers.GetUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
 	user.PUT("/profile", controllers.UpdateUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
+	user.DELETE("/profile", controllers.DeleteUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
 
 	// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 

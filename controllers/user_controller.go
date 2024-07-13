@@ -421,6 +421,29 @@ func UpdateUserProfileController(c echo.Context) error {
 	})
 }
 
+func DeleteUserProfileController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	err := repositories.DeleteUserProfile(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed delete user profile",
+			Response: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message: "success delete user profile",
+	})
+}
+
 // func ChangePasswordController(c echo.Context) error {
 // 	var payloads = dto.ChangePasswordRequest{}
 // 	errBind := c.Bind(&payloads)

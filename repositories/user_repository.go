@@ -7,6 +7,7 @@ import (
 	"rumeat-ball/middlewares"
 	"rumeat-ball/models"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -129,6 +130,54 @@ func ResetPassword(email, password string) error {
 	password = string(hashPassword)
 
 	tx := database.DB.Model(&models.User{}).Where("email = ?", email).Update("password", password)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
+func GetUserProfile(userID uuid.UUID) (models.User, error) {
+	var user models.User
+	tx := database.DB.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		return models.User{}, tx.Error
+	}
+	return user, nil
+}
+
+func UpdateUserProfile(userID uuid.UUID, updatedData models.User) (models.User, error) {
+	var user models.User
+	// Ambil data pengguna yang ada
+	tx := database.DB.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		return models.User{}, tx.Error
+	}
+
+	// Perbarui field hanya jika ada nilai baru yang diberikan
+	if updatedData.Name != "" {
+		user.Name = updatedData.Name
+	}
+	if updatedData.Password != "" {
+		user.Password = updatedData.Password
+	}
+	if updatedData.Address != "" {
+		user.Address = updatedData.Address
+	}
+	if updatedData.Phone != "" {
+		user.Phone = updatedData.Phone
+	}
+	if updatedData.ProfileImage != "" {
+		user.ProfileImage = updatedData.ProfileImage
+	}
+
+	// Simpan perubahan
+	tx = database.DB.Save(&user)
+	return user, tx.Error
+}
+
+func DeleteUserProfile(userID uuid.UUID) error {
+	var user models.User
+	tx := database.DB.Model(&user).Where("id = ?", userID).Delete(&user)
 	if tx.Error != nil {
 		return tx.Error
 	}
