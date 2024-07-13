@@ -161,3 +161,42 @@ func UpdateOrderCart(order models.Order) (models.Order, error) {
 	tx := database.DB.Save(&order)
 	return order, tx.Error
 }
+
+func GetUserProfile(userID uuid.UUID) (models.User, error) {
+	var user models.User
+	tx := database.DB.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		return models.User{}, tx.Error
+	}
+	return user, nil
+}
+
+func UpdateUserProfile(userID uuid.UUID, updatedData models.User) (models.User, error) {
+	var user models.User
+	// Ambil data pengguna yang ada
+	tx := database.DB.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		return models.User{}, tx.Error
+	}
+
+	// Perbarui field hanya jika ada nilai baru yang diberikan
+	if updatedData.Name != "" {
+		user.Name = updatedData.Name
+	}
+	if updatedData.Password != "" {
+		user.Password = updatedData.Password
+	}
+	if updatedData.Address != "" {
+		user.Address = updatedData.Address
+	}
+	if updatedData.Phone != "" {
+		user.Phone = updatedData.Phone
+	}
+	if updatedData.ProfileImage != "" {
+		user.ProfileImage = updatedData.ProfileImage
+	}
+
+	// Simpan perubahan
+	tx = database.DB.Save(&user)
+	return user, tx.Error
+}

@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"rumeat-ball/configs"
 	"rumeat-ball/dto"
+	m "rumeat-ball/middlewares"
 	"rumeat-ball/repositories"
 	"rumeat-ball/templates"
+	"rumeat-ball/util"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -334,6 +337,87 @@ func ResendOTPController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, dto.Response{
 		Message: "success resend otp",
+	})
+}
+
+func GetUserProfileController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	data, err := repositories.GetUserProfile(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed get user profile",
+			Response: err.Error(),
+		})
+	}
+
+	dataResponse := dto.ConvertToUserProfileResponse(data)
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success get user profile",
+		Response: dataResponse,
+	})
+}
+
+func UpdateUserProfileController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	var payloads = dto.UserUpdateRequest{}
+	errBind := c.Bind(&payloads)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error bind data",
+			Response: errBind.Error(),
+		})
+	}
+
+	updatedData := dto.ConvertToUpdateUserProfileModel(payloads)
+
+	profileImage, err := c.FormFile("profile_image")
+	if err != http.ErrMissingFile {
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, dto.Response{
+				Message:  "error upload profile image",
+				Response: err.Error(),
+			})
+		}
+
+		profileImageURL, err := util.UploadToCloudinary(profileImage)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, dto.Response{
+				Message:  "error upload profile image to Cloudinary",
+				Response: err.Error(),
+			})
+		}
+		updatedData.ProfileImage = profileImageURL
+	}
+
+	updatedUser, err := repositories.UpdateUserProfile(userID, updatedData)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed update user profile",
+			Response: err.Error(),
+		})
+	}
+
+	userResponse := dto.ConvertToUpdateUserProfileResponse(updatedUser)
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success update user profile",
+		Response: userResponse,
 	})
 }
 

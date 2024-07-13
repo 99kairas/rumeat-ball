@@ -29,7 +29,8 @@ func New() *echo.Echo {
 	user.POST("/order", controllers.CreateOrderController, middlewares.CheckRole(configs.ROLE_USER))
 	user.GET("/order", controllers.GetAllOrdersController, middlewares.CheckRole(configs.ROLE_USER))
 	user.GET("/order/:id", controllers.GetOrderByIDController, middlewares.CheckRole(configs.ROLE_USER))
-	user.PUT("/order/:id", controllers.CancelOrderController, middlewares.CheckRole(configs.ROLE_USER))
+	user.PUT("/order/cancel/:id", controllers.CancelOrderController, middlewares.CheckRole(configs.ROLE_USER))
+	user.PUT("/order/update/:id", controllers.UpdateOrderController, middlewares.CheckRole(configs.ROLE_USER))
 	// e.DELETE("/order/:id", controllers.DeleteOrderController)
 
 	// USERS MENU
@@ -45,6 +46,8 @@ func New() *echo.Echo {
 	// USERS RATINGS
 
 	// USERS PROFILE
+	user.GET("/profile", controllers.GetUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
+	user.PUT("/profile", controllers.UpdateUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
 
 	// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
