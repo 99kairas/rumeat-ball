@@ -455,19 +455,22 @@ func ChangePasswordController(c echo.Context) error {
 		})
 	}
 
-	if !isStrongPassword(payloads.Password) {
+	if !isStrongPassword(payloads.NewPassword) {
 		return c.JSON(http.StatusBadRequest, dto.Response{
 			Message:  "error change password",
 			Response: "password must be at least 8 characters and contain at least 1 uppercase letter and 1 symbol",
 		})
 	}
 
-	err := repositories.ChangePassword(userID, payloads.Password)
+	err := repositories.ChangePassword(userID, payloads.OldPassword, payloads.NewPassword)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.Response{
-			Message:  "failed change password",
-			Response: err.Error(),
-		})
+		if err.Error() == "old password is incorrect" {
+			return c.JSON(http.StatusUnauthorized, dto.Response{
+				Message:  "incorrect current password",
+				Response: "password does not match",
+			})
+		}
+
 	}
 
 	return c.JSON(http.StatusOK, dto.Response{

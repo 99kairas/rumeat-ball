@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 	"rumeat-ball/configs"
 	"rumeat-ball/database"
 	"rumeat-ball/middlewares"
@@ -184,15 +185,27 @@ func DeleteUserProfile(userID uuid.UUID) error {
 	return nil
 }
 
-func ChangePassword(userID uuid.UUID, password string) error {
+func ChangePassword(userID uuid.UUID, oldPassword, newPassword string) error {
 	var user models.User
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	tx := database.DB.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Verify old password
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword))
+	if err != nil {
+		return fmt.Errorf("old password is incorrect")
+	}
+
+	// Encrypt new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	password = string(hashPassword)
 
-	tx := database.DB.Model(&user).Where("id = ?", userID).Update("password", password)
+	// Update password in the database
+	tx = database.DB.Model(&user).Update("password", string(hashedPassword))
 	if tx.Error != nil {
 		return tx.Error
 	}

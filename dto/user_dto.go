@@ -145,6 +145,7 @@ func ConvertToUpdateUserProfileResponse(user models.User) UserProfileResponse {
 }
 
 type ChangePasswordRequest struct {
-	ID       uuid.UUID `json:"id" form:"id"`
-	Password string    `json:"password" form:"password"`
+	ID          uuid.UUID `json:"id" form:"id"`
+	OldPassword string    `json:"old_password" form:"old_password"`
+	NewPassword string    `json:"password" form:"password"`
 }
