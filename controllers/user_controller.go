@@ -444,33 +444,33 @@ func DeleteUserProfileController(c echo.Context) error {
 	})
 }
 
-// func ChangePasswordController(c echo.Context) error {
-// 	var payloads = dto.ChangePasswordRequest{}
-// 	errBind := c.Bind(&payloads)
-// 	if errBind != nil {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "error bind data",
-// 			Response: errBind.Error(),
-// 		})
-// 	}
+func ChangePasswordController(c echo.Context) error {
+	userID := m.ExtractTokenUserId(c)
+	var payloads = dto.ChangePasswordRequest{ID: userID}
+	errBind := c.Bind(&payloads)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error bind data",
+			Response: errBind.Error(),
+		})
+	}
 
-// 	emailExist := repositories.CheckUserEmail(payloads.Email)
-// 	if !emailExist {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "fail change password",
-// 			Response: "email not found",
-// 		})
-// 	}
+	if !isStrongPassword(payloads.Password) {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "error change password",
+			Response: "password must be at least 8 characters and contain at least 1 uppercase letter and 1 symbol",
+		})
+	}
 
-// 	err := repositories.ChangePassword(payloads.Email, payloads.Password)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "failed change password",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	err := repositories.ChangePassword(userID, payloads.Password)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed change password",
+			Response: err.Error(),
+		})
+	}
 
-// 	return c.JSON(http.StatusOK, dto.Response{
-// 		Message: "success change password",
-// 	})
-// }
+	return c.JSON(http.StatusOK, dto.Response{
+		Message: "success change password",
+	})
+}

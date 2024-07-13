@@ -143,3 +143,8 @@ func ConvertToUpdateUserProfileResponse(user models.User) UserProfileResponse {
 		ProfileImage: user.ProfileImage,
 	}
 }
+
+type ChangePasswordRequest struct {
+	ID       uuid.UUID `json:"id" form:"id"`
+	Password string    `json:"password" form:"password"`
+}

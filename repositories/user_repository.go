@@ -184,16 +184,17 @@ func DeleteUserProfile(userID uuid.UUID) error {
 	return nil
 }
 
-// func ChangePassword(email, password string) error {
-// 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	password = string(hashPassword)
+func ChangePassword(userID uuid.UUID, password string) error {
+	var user models.User
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	password = string(hashPassword)
 
-// 	tx := database.DB.Model(&models.User{}).Where("email = ?", email).Update("password", password)
-// 	if tx.Error != nil {
-// 		return tx.Error
-// 	}
-// 	return nil
-// }
+	tx := database.DB.Model(&user).Where("id = ?", userID).Update("password", password)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}

@@ -49,6 +49,7 @@ func New() *echo.Echo {
 	user.GET("/profile", controllers.GetUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
 	user.PUT("/profile", controllers.UpdateUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
 	user.DELETE("/profile", controllers.DeleteUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
+	user.PUT("/profile/change-password", controllers.ChangePasswordController, middlewares.CheckRole(configs.ROLE_USER))
 
 	// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
