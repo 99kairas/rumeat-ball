@@ -14,7 +14,7 @@ type Rating struct {
 	Menu    Menu      `gorm:"foreignKey:MenuID"`
 	UserID  uuid.UUID `gorm:"index" json:"user_id" form:"user_id"`
 	User    User      `gorm:"foreignKey:UserID"`
-	Rating  int       `json:"rating" form:"rating"`
+	Rating  float64   `json:"rating" form:"rating"`
 	Comment string    `json:"comment" form:"comment" gorm:"type:text"`
 	Date    time.Time `json:"date" form:"date"`
 }

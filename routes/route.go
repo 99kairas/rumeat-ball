@@ -44,6 +44,10 @@ func New() *echo.Echo {
 	// USERS TRANSACTION
 
 	// USERS RATINGS
+	user.POST("/ratings", controllers.CreateRatingMenuController, middlewares.CheckRole(configs.ROLE_USER))
+	user.GET("/ratings", controllers.GetAllRatingsController, middlewares.CheckRole(configs.ROLE_USER))
+	user.PUT("/ratings/:id", controllers.UpdateRatingMenuController, middlewares.CheckRole(configs.ROLE_USER))
+	user.DELETE("/ratings/:id", controllers.DeleteRatingMenuController, middlewares.CheckRole(configs.ROLE_USER))
 
 	// USERS PROFILE
 	user.GET("/profile", controllers.GetUserProfileController, middlewares.CheckRole(configs.ROLE_USER))
