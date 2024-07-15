@@ -38,6 +38,6 @@ func Init() {
 	SENDER_NAME = os.Getenv("SENDER_NAME")
 	AUTH_EMAIL = os.Getenv("AUTH_EMAIL")
 	AUTH_PASSWORD = os.Getenv("AUTH_PASSWORD")
-	MIDTRANS_SERVER_KEY = os.Getenv("MIDTRANS_SERVER_KEY")
-	MIDTRANS_CLIENT_KEY = os.Getenv("MIDTRANS_CLIENT_KEY")
+	MIDTRANS_SERVER_KEY = os.Getenv("Server_Key")
+	MIDTRANS_CLIENT_KEY = os.Getenv("Client_Key")
 }

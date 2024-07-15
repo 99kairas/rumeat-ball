@@ -211,3 +211,12 @@ func ChangePassword(userID uuid.UUID, oldPassword, newPassword string) error {
 	}
 	return nil
 }
+
+func GetUserByID(userID uuid.UUID) (models.User, error) {
+	var user models.User
+	tx := database.DB.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		return models.User{}, tx.Error
+	}
+	return user, nil
+}

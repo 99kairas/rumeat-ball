@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"rumeat-ball/configs"
 	"rumeat-ball/database"
 	m "rumeat-ball/middlewares"
@@ -9,10 +11,27 @@ import (
 	"rumeat-ball/routes"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 )
 
 func main() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	// Verify environment variables
+	serverKey := os.Getenv("Server_Key")
+	clientKey := os.Getenv("Client_Key")
+
+	if serverKey == "" || clientKey == "" {
+		log.Fatalf("Environment variables are not set correctly: Server_Key: %s, Client_Key: %s", serverKey, clientKey)
+	}
+
+	fmt.Println("Server Key:", serverKey)
+	fmt.Println("Client Key:", clientKey)
+
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	time.Local = loc
 	configs.Init()

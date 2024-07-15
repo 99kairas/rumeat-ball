@@ -42,6 +42,8 @@ func New() *echo.Echo {
 	e.GET("/category/:id", controllers.GetCategoryByIDController)
 
 	// USERS TRANSACTION
+	user.POST("/transaction", controllers.CreateTransactionController, middlewares.CheckRole(configs.ROLE_USER))
+	e.POST("/midtrans/notification", controllers.HandleMidTransNotificationController)
 
 	// USERS RATINGS
 	user.POST("/ratings", controllers.CreateRatingMenuController, middlewares.CheckRole(configs.ROLE_USER))
