@@ -1,8 +1,7 @@
 package util
 
 import (
-	"fmt"
-	"rumeat-ball/configs"
+	"os"
 	"rumeat-ball/models"
 
 	"github.com/veritrans/go-midtrans"
@@ -10,12 +9,12 @@ import (
 
 func GetPaymentURL(transaction *models.Transaction, user *models.User) (midtrans.SnapResponse, error) {
 	midclient := midtrans.NewClient()
-	midclient.ServerKey = configs.MIDTRANS_SERVER_KEY
-	midclient.ClientKey = configs.MIDTRANS_CLIENT_KEY
+	midclient.ServerKey = os.Getenv("Server_Key")
+	midclient.ClientKey = os.Getenv("Client_Key")
 	midclient.APIEnvType = midtrans.Sandbox
 
-	fmt.Println("Server Key : ", configs.MIDTRANS_SERVER_KEY)
-	fmt.Println("Client Key : ", configs.MIDTRANS_CLIENT_KEY)
+	// fmt.Println("Server Key : ", configs.MIDTRANS_SERVER_KEY)
+	// fmt.Println("Client Key : ", configs.MIDTRANS_CLIENT_KEY)
 
 	snapGateway := midtrans.SnapGateway{
 		Client: midclient,

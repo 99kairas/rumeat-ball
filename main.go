@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"rumeat-ball/configs"
@@ -29,8 +28,8 @@ func main() {
 		log.Fatalf("Environment variables are not set correctly: Server_Key: %s, Client_Key: %s", serverKey, clientKey)
 	}
 
-	fmt.Println("Server Key:", serverKey)
-	fmt.Println("Client Key:", clientKey)
+	// fmt.Println("Server Key:", serverKey)
+	// fmt.Println("Client Key:", clientKey)
 
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	time.Local = loc
