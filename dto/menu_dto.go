@@ -50,6 +50,16 @@ type GetMenuResponse struct {
 	CategoryID  uuid.UUID `json:"category_id"`
 }
 
+type GetAllMenuResponse struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Image       string    `json:"image"`
+	Price       float64   `json:"price"`
+	Status      string    `json:"status"`
+	CategoryID  uuid.UUID `json:"category_id"`
+}
+
 func ConvertToGetMenuResponse(menu models.Menu) GetMenuResponse {
 	return GetMenuResponse{
 		ID:          menu.ID,
