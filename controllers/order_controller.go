@@ -34,6 +34,7 @@ func CreateOrderController(c echo.Context) error {
 
 	// Calculate total price
 	var totalOrderPrice float64
+	var totalOrderWithTax float64
 	var orderItems []dto.OrderItem
 
 	for _, item := range orderReq.Items {
@@ -47,6 +48,8 @@ func CreateOrderController(c echo.Context) error {
 
 		totalItemPrice := float64(item.Quantity) * menu.Price
 		totalOrderPrice += totalItemPrice
+		tax := totalOrderPrice * 0.01
+		totalOrderWithTax = totalOrderPrice + tax
 		fmt.Print(userID)
 
 		// Add item to order items for response
@@ -59,7 +62,7 @@ func CreateOrderController(c echo.Context) error {
 		})
 	}
 
-	orderData.Total = totalOrderPrice
+	orderData.Total = totalOrderWithTax
 
 	// Create order
 	order, err := repositories.CreateOrder(orderData)
