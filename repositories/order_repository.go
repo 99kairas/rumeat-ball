@@ -161,3 +161,50 @@ func UpdateOrderCart(order models.Order) (models.Order, error) {
 	tx := database.DB.Save(&order)
 	return order, tx.Error
 }
+
+func AdminGetAllOrders() ([]models.Order, error) {
+	var orders []models.Order
+	tx := database.DB.Preload("User").Find(&orders)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return orders, nil
+}
+
+func AdminGetOrdersByUserName(userName string) ([]models.Order, error) {
+	var orders []models.Order
+	tx := database.DB.Preload("User").Joins("JOIN users ON users.id = orders.user_id").
+		Where("users.name LIKE ?", "%"+userName+"%").
+		Find(&orders)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return orders, nil
+}
+
+func AdminGetOrderByOrderID(id string) (models.Order, error) {
+	var order models.Order
+	tx := database.DB.Preload("User").Where("id = ?", id).First(&order)
+	if tx.Error != nil {
+		return models.Order{}, tx.Error
+	}
+	return order, nil
+}
+
+func AdminGetOrderItemsByOrderID(orderID string) ([]models.DetailOrder, error) {
+	var items []models.DetailOrder
+	tx := database.DB.Where("order_id = ?", orderID).Find(&items)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return items, nil
+}
+
+func AdminGetUserByID(userID uuid.UUID) (models.User, error) {
+	var user models.User
+	tx := database.DB.First(&user, "id = ?", userID)
+	if tx.Error != nil {
+		return models.User{}, tx.Error
+	}
+	return user, nil
+}

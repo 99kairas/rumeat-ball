@@ -83,5 +83,8 @@ func New() *echo.Echo {
 
 	// ADMIN RATINGS MANAGEMENT
 
+	// ADMIN ORDER MANAGEMENT
+	admin.GET("/order", controllers.AdminGetAllOrdersController, middlewares.CheckRole(configs.ROLE_ADMIN))
+
 	return e
 }

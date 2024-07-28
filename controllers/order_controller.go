@@ -320,3 +320,86 @@ func UpdateOrderController(c echo.Context) error {
 		Response: orderResponse,
 	})
 }
+
+func AdminGetAllOrdersController(c echo.Context) error {
+	adminID := m.ExtractTokenUserId(c)
+
+	if adminID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	userName := c.QueryParam("name")
+	userIDStr := c.QueryParam("user_id")
+	orderID := c.QueryParam("order_id")
+
+	var orders []models.Order
+	var err error
+
+	if userIDStr != "" {
+		userID, err := uuid.Parse(userIDStr)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, dto.Response{
+				Message:  "invalid user_id format",
+				Response: err.Error(),
+			})
+		}
+		orders, err = repositories.GetOrdersByUserID(userID)
+	} else if orderID != "" {
+		var order models.Order
+		order, err = repositories.GetOrderByOrderID(orderID)
+		if err == nil {
+			orders = append(orders, order)
+		}
+	} else if userName != "" {
+		orders, err = repositories.AdminGetOrdersByUserName(userName)
+	} else {
+		orders, err = repositories.AdminGetAllOrders()
+	}
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error fetching order data",
+			Response: err.Error(),
+		})
+	}
+
+	var orderResponses []dto.AdminOrderResponse
+	for _, order := range orders {
+		orderItems, err := repositories.GetOrderItemsByOrderID(order.ID, order.UserID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, dto.Response{
+				Message:  "error fetching order items data",
+				Response: err.Error(),
+			})
+		}
+
+		// Convert dto.OrderItem to models.DetailOrder
+		var detailOrders []models.DetailOrder
+		for _, item := range orderItems {
+			detailOrders = append(detailOrders, models.DetailOrder{
+				MenuID:     item.MenuID,
+				Quantity:   item.Quantity,
+				TotalPrice: item.TotalPrice,
+			})
+		}
+
+		user, err := repositories.GetUserByID(order.UserID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, dto.Response{
+				Message:  "error fetching user data",
+				Response: err.Error(),
+			})
+		}
+
+		orderResponse := dto.ConvertToAdminOrderResponse(order, detailOrders, user.Name)
+		orderResponses = append(orderResponses, orderResponse)
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success get all orders",
+		Response: orderResponses,
+	})
+}
