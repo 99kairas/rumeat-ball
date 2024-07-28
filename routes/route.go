@@ -80,6 +80,7 @@ func New() *echo.Echo {
 	admin.DELETE("/category/:id", controllers.DeleteCategoryController, middlewares.CheckRole(configs.ROLE_ADMIN))
 
 	// ADMIN TRANSACTIONS
+	admin.GET("/transaction", controllers.AdminGetAllTransactionsController, middlewares.CheckRole(configs.ROLE_ADMIN))
 
 	// ADMIN RATINGS MANAGEMENT
 

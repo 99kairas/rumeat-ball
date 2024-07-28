@@ -105,70 +105,69 @@ func HandleMidTransNotificationController(c echo.Context) error {
 	})
 }
 
-// func CreateTransactionController(c echo.Context) error {
-// 	var transactionReq dto.TransactionRequest
-// 	if err := c.Bind(&transactionReq); err != nil {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "Invalid request",
-// 			Response: err.Error(),
-// 		})
-// 	}
+func AdminGetAllTransactionsController(c echo.Context) error {
+	adminID := m.ExtractTokenUserId(c)
 
-// 	transaction := dto.ConvertToTransactionModel(transactionReq)
-// 	createdTransaction, err := repositories.CreateTransaction(transaction)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, dto.Response{
-// 			Message:  "Failed to create transaction",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	if adminID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
 
-// 	paymentURL, err := midtrans.CreatePayment(createdTransaction)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, dto.Response{
-// 			Message:  "Failed to create payment",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	userName := c.QueryParam("name")
+	userIDStr := c.QueryParam("user_id")
+	transactionIDStr := c.QueryParam("transaction_id")
+	orderID := c.QueryParam("order_id")
 
-// 	transactionResponse := dto.ConvertToTransactionResponse(createdTransaction)
-// 	transactionResponse.PaymentURL = paymentURL
+	var transactions []models.Transaction
+	var err error
 
-// 	return c.JSON(http.StatusOK, dto.Response{
-// 		Message:  "Transaction created",
-// 		Response: transactionResponse,
-// 	})
-// }
+	switch {
+	case userIDStr != "":
+		userID, err := uuid.Parse(userIDStr)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, dto.Response{
+				Message:  "invalid user_id format",
+				Response: err.Error(),
+			})
+		}
+		transactions, err = repositories.GetTransactionsByUserID(userID)
+	case transactionIDStr != "":
+		transactionID, err := uuid.Parse(transactionIDStr)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, dto.Response{
+				Message:  "invalid transaction_id format",
+				Response: err.Error(),
+			})
+		}
+		transaction, err := repositories.GetTransactionByID(transactionID)
+		if err == nil {
+			transactions = append(transactions, transaction)
+		}
+	case userName != "":
+		transactions, err = repositories.GetTransactionsByUserName(userName)
+	case orderID != "":
+		transactions, err = repositories.GetTransactionsByOrderID(orderID)
+	default:
+		transactions, err = repositories.GetAllTransactions()
+	}
 
-// func PaymentNotificationController(c echo.Context) error {
-// 	var notification midtrans.TransactionStatusResponse
-// 	if err := c.Bind(&notification); err != nil {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "Invalid request",
-// 			Response: err.Error(),
-// 		})
-// 	}
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error fetching transaction data",
+			Response: err.Error(),
+		})
+	}
 
-// 	transactionIDStr := notification.OrderID
-// 	status := notification.TransactionStatus
+	var transactionResponses []dto.AdminTransactionResponse
+	for _, transaction := range transactions {
+		transactionResponse := dto.ConvertToAdminTransactionResponse(transaction, transaction.User.Name)
+		transactionResponses = append(transactionResponses, transactionResponse)
+	}
 
-// 	transactionID, err := uuid.Parse(transactionIDStr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, dto.Response{
-// 			Message:  "Invalid transaction ID",
-// 			Response: err.Error(),
-// 		})
-// 	}
-
-// 	if err := repositories.UpdateTransactionStatus(transactionID, status); err != nil {
-// 		return c.JSON(http.StatusInternalServerError, dto.Response{
-// 			Message:  "Failed to update transaction status",
-// 			Response: err.Error(),
-// 		})
-// 	}
-
-// 	return c.JSON(http.StatusOK, dto.Response{
-// 		Message:  "Transaction status updated",
-// 		Response: nil,
-// 	})
-// }
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success get all transactions",
+		Response: transactionResponses,
+	})
+}
