@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"database/sql"
 	"rumeat-ball/database"
 	"rumeat-ball/models"
 	"time"
@@ -59,4 +60,55 @@ func GetMenuByID(id uuid.UUID) (models.Menu, error) {
 		return models.Menu{}, err
 	}
 	return menu, nil
+}
+
+func GetCommentCountAndAverageRating(menuID uuid.UUID) (int, float64, error) {
+	var commentCount int64
+	var averageRating sql.NullFloat64
+
+	// Hitung jumlah komentar
+	if err := database.DB.Model(&models.Rating{}).Where("menu_id = ?", menuID).Count(&commentCount).Error; err != nil {
+		return 0, 0, err
+	}
+
+	// Hitung rata-rata rating
+	if err := database.DB.Model(&models.Rating{}).Where("menu_id = ?", menuID).Select("AVG(rating)").Row().Scan(&averageRating); err != nil {
+		return 0, 0, err
+	}
+
+	// Cek jika averageRating valid
+	if !averageRating.Valid {
+		return int(commentCount), 0.0, nil
+	}
+
+	return int(commentCount), averageRating.Float64, nil
+}
+
+func GetAllCommentCountsAndAverageRatings() (map[uuid.UUID]int, map[uuid.UUID]float64, error) {
+	var ratings []models.Rating
+	commentCounts := make(map[uuid.UUID]int)
+	averageRatings := make(map[uuid.UUID]float64)
+
+	if err := database.DB.Find(&ratings).Error; err != nil {
+		return nil, nil, err
+	}
+
+	for _, rating := range ratings {
+		commentCounts[rating.MenuID]++
+		averageRatings[rating.MenuID] += rating.Rating
+	}
+
+	for id := range averageRatings {
+		averageRatings[id] /= float64(commentCounts[id])
+	}
+
+	return commentCounts, averageRatings, nil
+}
+
+func GetCommentsByMenuID(menuID uuid.UUID) ([]models.Rating, error) {
+	var comments []models.Rating
+	if err := database.DB.Where("menu_id = ?", menuID).Preload("User").Find(&comments).Error; err != nil {
+		return nil, err
+	}
+	return comments, nil
 }

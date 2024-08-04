@@ -26,6 +26,16 @@ type RatingResponse struct {
 	Date    string  `json:"date" form:"date"`
 }
 
+type RatingResponseDetailsMenu struct {
+	ID      uuid.UUID `json:"id" form:"id"`
+	MenuID  uuid.UUID `json:"menu_id" form:"menu_id"`
+	UserID  uuid.UUID `json:"user_id" form:"user_id"`
+	User    UserProfileResponse
+	Comment string  `json:"comment" form:"comment"`
+	Rating  float64 `json:"rating" form:"rating"`
+	Date    string  `json:"date" form:"date"`
+}
+
 type CreateRatingMenuResponse struct {
 	ID      uuid.UUID `json:"id" form:"id"`
 	MenuID  uuid.UUID `json:"menu_id" form:"menu_id"`
@@ -82,7 +92,24 @@ func ConvertToGetAllRatingsResponse(ratings []models.Rating) []RatingResponse {
 		ratingResponses = append(ratingResponses, RatingResponse{
 			ID:      rating.ID,
 			MenuID:  rating.MenuID,
-			Menu:    ConvertToGetMenuResponse(rating.Menu),
+			Menu:    ConvertToGetMenuResponse(rating.Menu, 0, 0),
+			UserID:  rating.UserID,
+			User:    ConvertToUserProfileResponse(rating.User),
+			Comment: rating.Comment,
+			Rating:  rating.Rating,
+			Date:    dateFormat,
+		})
+	}
+	return ratingResponses
+}
+
+func ConvertToGetAllRatingsResponseDetailsMenu(ratings []models.Rating) []RatingResponseDetailsMenu {
+	var ratingResponses []RatingResponseDetailsMenu
+	for _, rating := range ratings {
+		dateFormat := rating.Date.Format("02 January 2006 15:04")
+		ratingResponses = append(ratingResponses, RatingResponseDetailsMenu{
+			ID:      rating.ID,
+			MenuID:  rating.MenuID,
 			UserID:  rating.UserID,
 			User:    ConvertToUserProfileResponse(rating.User),
 			Comment: rating.Comment,
@@ -109,7 +136,7 @@ func ConvertToUpdateRatingResponse(rating models.Rating) UpdateRatingMenuRespons
 		UserID:  rating.UserID,
 		MenuID:  rating.MenuID,
 		User:    ConvertToUserProfileResponse(rating.User),
-		Menu:    ConvertToGetMenuResponse(rating.Menu),
+		Menu:    ConvertToGetMenuResponse(rating.Menu, 0, 0),
 		Comment: rating.Comment,
 		Rating:  rating.Rating,
 		Date:    dateFormat,

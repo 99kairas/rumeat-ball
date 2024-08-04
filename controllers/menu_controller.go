@@ -96,10 +96,15 @@ func GetMenuController(c echo.Context) error {
 		})
 	}
 
-	menuData := []dto.GetMenuResponse{}
-	for _, menu := range data {
-		menuData = append(menuData, dto.ConvertToGetMenuResponse(menu))
+	commentCounts, averageRatings, err := repositories.GetAllCommentCountsAndAverageRatings()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error get comment counts and average ratings",
+			Response: err.Error(),
+		})
 	}
+
+	menuData := dto.ConvertToGetAllMenuResponse(data, commentCounts, averageRatings)
 
 	return c.JSON(http.StatusOK, dto.Response{
 		Message:  "success get menu",
@@ -124,7 +129,26 @@ func GetMenuByIDController(c echo.Context) error {
 		})
 	}
 
-	menuData := dto.ConvertToGetMenuResponse(data)
+	commentCount, averageRating, err := repositories.GetCommentCountAndAverageRating(menuID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error get comment count and average rating",
+			Response: err.Error(),
+		})
+	}
+
+	comments, err := repositories.GetCommentsByMenuID(menuID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "error get comments",
+			Response: err.Error(),
+		})
+	}
+
+	commentResponses := dto.ConvertToGetAllRatingsResponseDetailsMenu(comments)
+	menuData := dto.ConvertToGetMenuResponse(data, commentCount, averageRating)
+	menuData.Comments = commentResponses // Set data komentar
+
 	return c.JSON(http.StatusOK, dto.Response{
 		Message:  "success get menu",
 		Response: menuData,
