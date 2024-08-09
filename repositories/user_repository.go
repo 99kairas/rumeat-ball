@@ -39,24 +39,29 @@ func CheckUser(email string, password string) (models.User, string, error) {
 func CheckAdmin(email string, password string) (models.User, string, error) {
 	var data models.User
 
+	// Cari user berdasarkan email
 	tx := database.DB.Where("email = ?", email).First(&data)
 	if tx.Error != nil {
 		return models.User{}, "", errors.New("invalid email or password")
 	}
 
+	// Cek apakah password benar
 	err := bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(password))
 	if err != nil {
 		return models.User{}, "", errors.New("invalid email or password")
 	}
 
-	var token string
-	if tx.RowsAffected > 0 {
-		var errToken error
-		token, errToken = middlewares.CreateToken(data.ID, configs.ROLE_ADMIN, data.Email)
-		if errToken != nil {
-			return models.User{}, "", errToken
-		}
+	// Validasi apakah user ini adalah admin
+	if data.Role != configs.ROLE_ADMIN {
+		return models.User{}, "", errors.New("unauthorized access: not an admin")
 	}
+
+	// Jika semua validasi lolos, buat token dengan role admin
+	token, errToken := middlewares.CreateToken(data.ID, configs.ROLE_ADMIN, data.Email)
+	if errToken != nil {
+		return models.User{}, "", errToken
+	}
+
 	return data, token, nil
 }
 

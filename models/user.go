@@ -16,4 +16,5 @@ type User struct {
 	ProfileImage string    `json:"profile_image" form:"profile_image"`
 	Status       string    `gorm:"type:enum('verified', 'unverified');default:unverified" json:"status" form:"status"`
 	OTP          string    `json:"otp" form:"otp"`
+	Role         string    `gorm:"type:enum('user', 'admin');default:user" json:"role" form:"role"`
 }

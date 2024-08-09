@@ -187,6 +187,7 @@ func LoginUserController(c echo.Context) error {
 		ID:    data.ID,
 		Name:  data.Name,
 		Email: data.Email,
+		Role:  data.Role,
 		Token: token,
 	}
 
@@ -282,6 +283,7 @@ func AdminLoginController(c echo.Context) error {
 		ID:    data.ID,
 		Name:  data.Name,
 		Email: data.Email,
+		Role:  data.Role,
 		Token: token,
 	}
 

@@ -80,6 +80,7 @@ func Seeders() {
 			Address:  "Jl. Jendral Sudirman",
 			Phone:    "08123456789",
 			Status:   "verified",
+			Role:     "admin",
 		},
 	}
 
