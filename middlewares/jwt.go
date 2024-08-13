@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"rumeat-ball/configs"
 	"rumeat-ball/dto"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -17,6 +18,7 @@ func CreateToken(userID uuid.UUID, role, email string) (string, error) {
 	claims["user_id"] = userID
 	claims["email"] = email
 	claims["role"] = role
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 	// token pertama (header)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// return bersama token ketiga (dengan secret key)
