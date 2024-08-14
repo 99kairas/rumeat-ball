@@ -479,3 +479,50 @@ func ChangePasswordController(c echo.Context) error {
 		Message: "success change password",
 	})
 }
+
+func AdminGetAllUserController(c echo.Context) error {
+	// Ambil ID pengguna dari token untuk memastikan admin
+	userID := m.ExtractTokenUserId(c)
+	if userID == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, dto.Response{
+			Message:  "unauthorized",
+			Response: "permission denied: user is not valid",
+		})
+	}
+
+	// Cek apakah pengguna dengan ID ini adalah admin
+	user, err := repositories.GetUserByID(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed to fetch user",
+			Response: err.Error(),
+		})
+	}
+
+	if user.Role != configs.ROLE_ADMIN {
+		return c.JSON(http.StatusForbidden, dto.Response{
+			Message:  "forbidden",
+			Response: "permission denied: user is not an admin",
+		})
+	}
+
+	// Ambil semua data pengguna
+	users, err := repositories.AdminGetAllUsers()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed to fetch users",
+			Response: err.Error(),
+		})
+	}
+
+	// Convert data pengguna ke response DTO
+	var userResponses []dto.UserProfileResponse
+	for _, user := range users {
+		userResponses = append(userResponses, dto.ConvertToUserProfileResponse(user))
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "success get all users",
+		Response: userResponses,
+	})
+}

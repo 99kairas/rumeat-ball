@@ -61,6 +61,7 @@ type UserProfileResponse struct {
 	Address      string    `json:"address"`
 	Status       string    `json:"status"`
 	ProfileImage string    `json:"profile_image"`
+	Role         string    `json:"role"`
 }
 
 func ConvertToUserModel(user UserRequest) models.User {
@@ -118,6 +119,7 @@ func ConvertToUserProfileResponse(user models.User) UserProfileResponse {
 		Address:      user.Address,
 		Status:       user.Status,
 		ProfileImage: user.ProfileImage,
+		Role:         user.Role,
 	}
 }
 

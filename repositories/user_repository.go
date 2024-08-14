@@ -225,3 +225,12 @@ func GetUserByID(userID uuid.UUID) (models.User, error) {
 	}
 	return user, nil
 }
+
+func AdminGetAllUsers() ([]models.User, error) {
+	var users []models.User
+	tx := database.DB.Find(&users)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return users, nil
+}
