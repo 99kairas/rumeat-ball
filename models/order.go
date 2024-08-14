@@ -9,7 +9,7 @@ import (
 
 type Order struct {
 	gorm.Model
-	ID           string    `json:"id" form:"id" gorm:"type:varchar(10)"`
+	ID           string    `json:"id" form:"id" gorm:"type:varchar(15)"`
 	UserID       uuid.UUID `gorm:"index" json:"user_id" form:"user_id"`
 	User         User      `gorm:"foreignKey:UserID"`
 	Date         time.Time `json:"date" form:"date"`

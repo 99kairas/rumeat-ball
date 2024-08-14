@@ -92,3 +92,7 @@ func ConvertToAdminOrderResponse(order models.Order, items []models.DetailOrder,
 		Items:    itemResponses,
 	}
 }
+
+type UpdateOrderStatusRequest struct {
+	Status string `json:"status"`
+}

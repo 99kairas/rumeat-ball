@@ -86,6 +86,7 @@ func New() *echo.Echo {
 
 	// ADMIN ORDER MANAGEMENT
 	admin.GET("/order", controllers.AdminGetAllOrdersController, middlewares.CheckRole(configs.ROLE_ADMIN))
+	admin.PUT("/order/:id", controllers.AdminUpdateOrderStatusController, middlewares.CheckRole(configs.ROLE_ADMIN))
 
 	return e
 }

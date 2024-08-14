@@ -208,3 +208,10 @@ func AdminGetUserByID(userID uuid.UUID) (models.User, error) {
 	}
 	return user, nil
 }
+
+func AdminUpdateOrderStatus(id string, status string) error {
+	if err := database.DB.Model(&models.Order{}).Where("id = ?", id).Update("status", status).Error; err != nil {
+		return err
+	}
+	return nil
+}
