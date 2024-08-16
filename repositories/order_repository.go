@@ -143,7 +143,7 @@ func GetOrderItemsByOrderID(orderID string, userID uuid.UUID) ([]dto.OrderItem, 
 	return items, nil
 }
 
-func CancelOrder(orderID uuid.UUID) error {
+func CancelOrder(orderID string) error {
 	// CHANGE STATUS TO CANCELED
 	tx := database.DB.Model(&models.Order{}).Where("id = ?", orderID).Update("status", "cancelled").Delete(&models.Order{})
 	if tx.Error != nil {

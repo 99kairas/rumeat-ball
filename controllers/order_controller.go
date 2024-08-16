@@ -189,15 +189,15 @@ func CancelOrderController(c echo.Context) error {
 		})
 	}
 
-	orderID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
+	orderID := c.Param("id")
+	if orderID == "" {
 		return c.JSON(http.StatusBadRequest, dto.Response{
 			Message:  "error parse id",
-			Response: err.Error(),
+			Response: "order id is invalid",
 		})
 	}
 
-	err = repositories.CancelOrder(orderID)
+	err := repositories.CancelOrder(orderID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.Response{
 			Message:  "error cancel order",
