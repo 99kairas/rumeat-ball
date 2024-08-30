@@ -78,6 +78,8 @@ func CreateTransactionController(c echo.Context) error {
 
 func HandleMidTransNotificationController(c echo.Context) error {
 	var notification dto.MidTransNotification
+
+	// Bind data notifikasi dari Midtrans
 	if err := c.Bind(&notification); err != nil {
 		return c.JSON(http.StatusBadRequest, dto.Response{
 			Message:  "error bind data",
@@ -85,7 +87,8 @@ func HandleMidTransNotificationController(c echo.Context) error {
 		})
 	}
 
-	_, err := repositories.GetTransactionByOrderID(notification.OrderID)
+	// Dapatkan transaksi berdasarkan OrderID dari notifikasi
+	transaction, err := repositories.GetTransactionByOrderID(notification.OrderID)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, dto.Response{
 			Message:  "transaction not found",
@@ -93,7 +96,25 @@ func HandleMidTransNotificationController(c echo.Context) error {
 		})
 	}
 
-	if _, err := repositories.UpdateTransactionStatus(notification.OrderID, notification.TransactionStatus); err != nil {
+	// Periksa status transaksi yang diterima dari Midtrans
+	var newStatus string
+	switch notification.TransactionStatus {
+	case "settlement", "capture":
+		newStatus = "successed"
+	case "pending":
+		newStatus = "pending"
+	case "deny", "cancel", "expire":
+		newStatus = "failed"
+	default:
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "invalid transaction status",
+			Response: "unexpected transaction status from Midtrans",
+		})
+	}
+
+	// Memperbarui status transaksi di database
+	updatedTransaction, err := repositories.UpdateTransactionStatus(transaction.OrderID, newStatus)
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.Response{
 			Message:  "error updating transaction status",
 			Response: err.Error(),
@@ -102,6 +123,15 @@ func HandleMidTransNotificationController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, dto.Response{
 		Message: "success handle midtrans notification",
+		Response: dto.TransactionResponse{
+			ID:          updatedTransaction.ID,
+			OrderID:     updatedTransaction.OrderID,
+			UserID:      updatedTransaction.UserID,
+			Status:      updatedTransaction.Status,
+			PaymentURL:  updatedTransaction.PaymentURL,
+			TotalAmount: updatedTransaction.TotalPrice,
+			CreatedAt:   updatedTransaction.CreatedAt,
+		},
 	})
 }
 
