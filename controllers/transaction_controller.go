@@ -41,7 +41,7 @@ func CreateTransactionController(c echo.Context) error {
 		ID:         uuid.New(),
 		OrderID:    req.OrderID,
 		UserID:     userID,
-		Status:     "pending",
+		Status:     "successed",
 		TotalPrice: req.TotalAmount,
 	}
 

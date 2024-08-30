@@ -436,3 +436,36 @@ func AdminUpdateOrderStatusController(c echo.Context) error {
 		Response: nil,
 	})
 }
+
+func UserUpdateOrderStatusController(c echo.Context) error {
+	// Parse order ID from the URL
+	orderID := c.Param("id")
+	if orderID == "" {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "invalid order ID",
+			Response: "invalid order ID",
+		})
+	}
+
+	var statusReq dto.UpdateOrderStatusRequest
+	if err := c.Bind(&statusReq); err != nil {
+		return c.JSON(http.StatusBadRequest, dto.Response{
+			Message:  "failed to bind status data",
+			Response: err.Error(),
+		})
+	}
+
+	// Update the order status in the database
+	err := repositories.UserUpdateOrderStatus(orderID, statusReq.Status)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.Response{
+			Message:  "failed to update order status",
+			Response: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, dto.Response{
+		Message:  "order status updated successfully",
+		Response: nil,
+	})
+}
